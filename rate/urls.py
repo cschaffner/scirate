@@ -14,20 +14,16 @@ from rate.models import Article
     #    url(r'^admin/', include(admin.site.urls)),
 
 urlpatterns = patterns('',
-    url(r'^$',
-        ListView.as_view(
-            queryset=Article.objects.order_by('-date')[:5],
-            context_object_name='latest_article_list',
-            template_name='scirate/index.html')),
+    url(r'^$', 'rate.views.displaytoday'),
     url(r'^(?P<pk>\d+)/$',
         DetailView.as_view(
             model=Article,
-            template_name='scirate/detail.html')),
-    url(r'^loadtoday/$', 'scirate.views.loadtoday'),            
+            template_name='detail.html')),
+    url(r'^loadtoday/$', 'rate.views.loadtoday'),            
     # url(r'^(?P<pk>\d+)/results/$',
     #     DetailView.as_view(
     #         model=Poll,
-    #         template_name='scirate/results.html'),
+    #         template_name='results.html'),
     #     name='poll_results'),
     # url(r'^(?P<poll_id>\d+)/vote/$', 'scirate.views.vote'),
 )

@@ -4,6 +4,7 @@ import urllib
 from xml.dom.minidom import parse
 from rate.models import Article
 from datetime import *
+from django.views.generic import DetailView, ListView
 
 
 def loadtoday(request):
@@ -35,3 +36,17 @@ def loadtoday(request):
     # load today's articles here
     return HttpResponse("Added %s to load today's articles." % articles.length)
 
+def displaytoday(request):
+    queryset=Article.objects.filter(date='2012-01-10')
+    if request.user.is_authenticated():
+        # Do something for authenticated users.
+        return render_to_response('index.html', {"article_list": queryset})
+    else:
+        # Do something for anonymous users.
+        return HttpResponse("Anonymous here")
+
+#ListView.as_view(
+#        queryset=Article.objects.order_by('-date')[:50],
+#        context_object_name='latest_article_list',
+#        template_name='index.html')
+    

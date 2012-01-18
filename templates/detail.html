@@ -1,9 +1,7 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-<html> <head>
-<title></title>
-</head>
+{% extends "base.html" %}
 
-<body>
+{% block content %}
+
 <h1>{{ article.identifier }}</h1>
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
@@ -15,4 +13,4 @@
 <!-- <input type="submit" value="Vote" /> -->
 </form>
 
-</body> </html>
+{% endblock content %}

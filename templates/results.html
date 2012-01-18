@@ -1,9 +1,7 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-<html> <head>
-<title></title>
-</head>
+{% extends "base.html" %}
 
-<body>
+{% block content %}
+
 <h1>{{ poll.question }}</h1>
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
@@ -16,4 +14,4 @@
 
 <a href="/polls/{{ poll.id }}/">Vote again?</a>
 
-</body> </html>
+{% endblock content %}
