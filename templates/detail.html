@@ -1,0 +1,18 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title></title>
+</head>
+
+<body>
+<h1>{{ article.identifier }}</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="/sci/{{ article.identifier }}/vote/" method="post">
+{% csrf_token %}
+<!--     <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" /> -->
+<!--     <label for="choice{{ forloop.counter }}">{{ choice.choice }}</label><br /> -->
+<!-- <input type="submit" value="Vote" /> -->
+</form>
+
+</body> </html>
