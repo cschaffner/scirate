@@ -19,7 +19,7 @@ class UserProfile(models.Model):
         ('lanl', 'U.S. mirror'),
     )
     user = models.ForeignKey(User, unique=True)
-    mirror_pref = models.CharField(max_length=4, choices=ARXIV_MIRRORS, blank=True)
+    mirror_pref = models.CharField(max_length=4, choices=ARXIV_MIRRORS, blank=True, null=True)
     #  arxiv_category_pref
 
     def __unicode__(self):
