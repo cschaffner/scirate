@@ -1,9 +1,9 @@
 from django.http import HttpResponse
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 import urllib
 from xml.dom.minidom import parse
 from rate.models import Article
-from datetime import *
+from datetime import date
 from django.views.generic import DetailView, ListView
 
 
@@ -36,15 +36,47 @@ def loadtoday(request):
     # load today's articles here
     return HttpResponse("Added %s to load today's articles." % articles.length)
 
-def displaytoday(request):
-    queryset=Article.objects.filter(date='2012-01-10')
+def articles(request,year=date.today().year,month='all',day='all'):
+    queryset=Article.objects.filter(date__year=year)
+    if month<>'all':
+        queryset=queryset.filter(date__month=month)
+    if day<>'all':
+        queryset=queryset.filter(date__day=day)        
     if request.user.is_authenticated():
         # Do something for authenticated users.
-        return render_to_response('index.html', {"article_list": queryset})
+        queryset = list(queryset)
+        queryset.sort(key = lambda x:-x.score())
+        return render_to_response('index.html', {"article_list": queryset, 
+                                                 "year": year, "month": month, "day": day})
     else:
         # Do something for anonymous users.
         return HttpResponse("Anonymous here")
 
+def like(request, id):
+    if request.user.is_authenticated():
+        # Do something for authenticated users.
+        art=Article.objects.get(identifier=id)
+        art.dislikes.remove(request.user)          
+        art.likes.add(request.user)
+        return redirect('/rate')
+    else:
+        # Do something for anonymous users.
+        return HttpResponse("You need to be logged in to like something")
+
+def dislike(request, id):
+    if request.user.is_authenticated():
+        # Do something for authenticated users.
+        art=Article.objects.get(identifier=id)
+        art.likes.remove(request.user)          
+        art.dislikes.add(request.user)
+        art.save
+        return redirect('/rate')
+    else:
+        # Do something for anonymous users.
+        return HttpResponse("You need to be logged in to dislike something")
+    
+    
+    
 #ListView.as_view(
 #        queryset=Article.objects.order_by('-date')[:50],
 #        context_object_name='latest_article_list',

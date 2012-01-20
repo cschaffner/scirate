@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Articles of 2012-01-10</h1>
+<h1>Articles of {{year}}-{{month}}-{{day}}</h1>
 
 {% if article_list %}
     <dl>
     {% for article in article_list %}   	
-        <dt><a href="/detail/{{ article.identifier }}/">{{ article.identifier }}</a> 
-        	<a href="/like/{{ article.identifier }}">like</a> 
-        	<a href="/dislike/{{ article.identifier }}">dislike</a> 
+        <dt><a href="/rate/detail/{{ article.identifier }}/">{{ article.identifier }}</a> 
+        	<a href="/rate/like/{{ article.identifier }}">like</a> 
+        	<a href="/rate/dislike/{{ article.identifier }}">dislike</a> 
+        	<a href="http://arxiv.org/abs/{{ article.identifier }}">abs</a>    	
         	<a href="http://arxiv.org/pdf/{{ article.identifier }}">PDF</a><dt>
         <dd><div class="meta">
         	<div class="score">Score: {{ article.likes.count }} {{ article.dislikes.count }}</div>

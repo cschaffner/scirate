@@ -41,6 +41,9 @@ class Article(models.Model):
 
     def __unicode__(self):
         return self.identifier
+    
+    def score(self):
+        return self.likes.count() - self.dislikes.count()
 
 class Comment(models.Model):
     user = models.ForeignKey(User)
