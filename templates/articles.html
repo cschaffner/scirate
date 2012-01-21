@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>
+	<a href="/rate/{{yes_year}}/{{yes_month}}/{{yes_day}}">yesterday</a>
+	Articles of {{year}}-{{month}}-{{day}}
+	<a href="/rate/{{tom_year}}/{{tom_month}}/{{tom_day}}">tomorrow</a></h1>
+
+{% if article_list %}
+    <dl>
+    {% for article in article_list %}   	
+        <dt><a href="/rate/detail/{{ article.identifier }}/">{{ article.identifier }}</a> 
+        	<a href="/rate/like/{{ article.identifier }}">like</a> 
+        	<a href="/rate/dislike/{{ article.identifier }}">dislike</a> 
+        	<a href="http://arxiv.org/abs/{{ article.identifier }}">abs</a>    	
+        	<a href="http://arxiv.org/pdf/{{ article.identifier }}">PDF</a><dt>
+        <dd><div class="meta">
+        	<div class="score">Score: {{ article.likes.count }} {{ article.dislikes.count }}</div>
+        	<div class="list-title">{{ article.title }}</div>
+        	<div class="list-authors">{{ article.authors }}</div>
+        	<p>{{ article.abstract }}</p>
+        </div></dd>	
+    {% endfor %}
+    </dl>
+{% else %}
+    <p>No articles are available.</p>
+{% endif %}
+
+{% endblock content %}

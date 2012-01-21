@@ -2,6 +2,7 @@ from django.conf.urls.defaults import patterns, include, url
 from django.views.generic import DetailView, ListView
 from rate.models import Article
 from datetime import date
+from django.contrib.auth import views
 
 #urlpatterns = patterns('',
     # Examples:
@@ -17,19 +18,16 @@ from datetime import date
 urlpatterns = patterns('rate.views',
     url(r'^$', 'articles',{'year': date.today().year, 'month': date.today().month, 'day': date.today().day}),
     url(r'^(\d{4})/$', 'articles'),
-    url(r'^(\d{4})/(\d{2})/$', 'articles'),
-    url(r'^(\d{4})/(\d{2})/(\d+)/$', 'articles'),
+    url(r'^(\d{4})/(\d{1,2})/$', 'articles'),
+    url(r'^(\d{4})/(\d{1,2})/(\d+)/$', 'articles'),
     url(r'^detail/(?P<pk>\d{4}\.\d{4})/$',
         DetailView.as_view(
             model=Article,
             template_name='detail.html')),
     url(r'^like/(?P<id>\d{4}\.\d{4})/$', 'like'),
     url(r'^dislike/(?P<id>\d{4}\.\d{4})/$', 'dislike'),
-    url(r'^loadtoday/$', 'loadtoday'),            
-    # url(r'^(?P<pk>\d+)/results/$',
-    #     DetailView.as_view(
-    #         model=Poll,
-    #         template_name='results.html'),
-    #     name='poll_results'),
-    # url(r'^(?P<poll_id>\d+)/vote/$', 'scirate.views.vote'),
+    url(r'^logout$', 'logout_view'),            
+)
+urlpatterns += patterns('',
+    url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
 )

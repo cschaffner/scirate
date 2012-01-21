@@ -1,56 +1,36 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
-import urllib
-from xml.dom.minidom import parse
-from rate.models import Article
-from datetime import date
+from rate.models import Article, DownloadAction
+from datetime import date, datetime, timedelta
 from django.views.generic import DetailView, ListView
+from django.contrib.auth import logout
 
-
-def loadtoday(request):
-    URL = "http://export.arxiv.org/oai2?verb=ListRecords&set=physics:quant-ph&from=2012-01-12&metadataPrefix=arXivRaw"
-
-    #    dom = parse(urllib.urlopen(URL))
-    dom = parse('biglist.xml')
-
-    articles = dom.getElementsByTagName('record')
-    
-    for node in articles:
-        art = Article()
-        nodedata = node.childNodes.item(3).childNodes.item(1)
-        art.identifier = nodedata.getElementsByTagName('id').item(0).childNodes.item(0).nodeValue
-        art.title = nodedata.getElementsByTagName('title').item(0).childNodes.item(0).nodeValue
-        art.authors = nodedata.getElementsByTagName('authors').item(0).childNodes.item(0).nodeValue
-        art.abstract = nodedata.getElementsByTagName('abstract').item(0).childNodes.item(0).nodeValue
-        if nodedata.getElementsByTagName('journal-ref').length==1:
-            art.journal_ref = nodedata.getElementsByTagName('journal-ref').item(0).childNodes.item(0).nodeValue
-        if nodedata.getElementsByTagName('comments').length==1:
-            art.arxiv_comments = nodedata.getElementsByTagName('comments').item(0).childNodes.item(0).nodeValue
-        # determine date from first available version
-        datestring = nodedata.getElementsByTagName('version').item(0).childNodes.item(0).childNodes.item(0).nodeValue
-        date = datetime.strptime(datestring,'%a, %d %b %Y %H:%M:%S GMT')
-        art.date = date.date()
-        art.anonymous_abs_exp = 0
-        art.save()
-        
-    # load today's articles here
-    return HttpResponse("Added %s to load today's articles." % articles.length)
 
 def articles(request,year=date.today().year,month='all',day='all'):
+    # check for updates
+    Article.objects.update()
     queryset=Article.objects.filter(date__year=year)
     if month<>'all':
         queryset=queryset.filter(date__month=month)
     if day<>'all':
-        queryset=queryset.filter(date__day=day)        
+        queryset=queryset.filter(date__day=day) 
+        tomorrow=date(int(year),int(month),int(day))+timedelta(days=1)
+        yesterday=date(int(year),int(month),int(day))-timedelta(days=1)
+    queryset = list(queryset)
+    queryset.sort(key = lambda x:-x.score())
+    
+    
     if request.user.is_authenticated():
         # Do something for authenticated users.
-        queryset = list(queryset)
-        queryset.sort(key = lambda x:-x.score())
-        return render_to_response('index.html', {"article_list": queryset, 
-                                                 "year": year, "month": month, "day": day})
+        return render_to_response('index_auth.html', {"article_list": queryset, 
+            "year": year, "month": month, "day": day,
+            "tom_year": tomorrow.year, "tom_month": '%02d' % tomorrow.month, "tom_day": '%02d' % tomorrow.day,
+            "yes_year": yesterday.year, "yes_month": '%02d' % yesterday.month, "yes_day": '%02d' % yesterday.day,            
+            "user": request.user})
     else:
         # Do something for anonymous users.
-        return HttpResponse("Anonymous here")
+        return render_to_response('index.html', {"article_list": queryset, 
+                                                 "year": year, "month": month, "day": day})
 
 def like(request, id):
     if request.user.is_authenticated():
@@ -74,7 +54,11 @@ def dislike(request, id):
     else:
         # Do something for anonymous users.
         return HttpResponse("You need to be logged in to dislike something")
-    
+
+def logout_view(request):
+    logout(request)
+    return redirect('/rate')
+
     
     
 #ListView.as_view(
