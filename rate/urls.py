@@ -26,6 +26,7 @@ urlpatterns = patterns('rate.views',
             template_name='detail.html')),
     url(r'^like/(?P<id>\d{4}\.\d{4})/$', 'like'),
     url(r'^dislike/(?P<id>\d{4}\.\d{4})/$', 'dislike'),
+    url(r'^vote/', 'vote'),
     url(r'^logout$', 'logout_view'),            
 )
 urlpatterns += patterns('',

@@ -32,13 +32,42 @@ def articles(request,year=date.today().year,month='all',day='all'):
         return render_to_response('index.html', {"article_list": queryset, 
                                                  "year": year, "month": month, "day": day})
 
+def vote(request):
+    if request.user.is_authenticated():
+        results = {'success':False}
+        if request.method == u'GET':
+            GET = request.GET
+            if GET.has_key(u'identifier') and GET.has_key(u'vote'):
+                ident = GET[u'identifier']
+                vote = GET[u'vote']
+                art=Article.objects.get(identifier=ident)
+                if vote == u"like":
+                    art.dislikes.remove(request.user)          
+                    art.likes.add(request.user)
+                elif vote == u"dislike":
+                    art.likes.remove(request.user)          
+                    art.dislikes.add(request.user)                
+                results = {'success':True}
+            if request.is_ajax():  
+                results = {'success':True}
+        json = simplejson.dumps(results)
+        return HttpResponse(json, mimetype='application/json')  
+    else:
+        # Do something for anonymous users.
+        return HttpResponse("You need to be logged in to like something")
+
 def like(request, id):
     if request.user.is_authenticated():
-        # Do something for authenticated users.
-        art=Article.objects.get(identifier=id)
-        art.dislikes.remove(request.user)          
-        art.likes.add(request.user)
-        return redirect('/rate')
+        results = {'success':False}
+        if request.method == "POST":  
+            ident = request.POST['identifier']
+            art=Article.objects.get(identifier=ident)
+            art.dislikes.remove(request.user)          
+            art.likes.add(request.user)
+        if request.is_ajax():  
+            results = {'success':True}
+        json = simplejson.dumps(results)
+        return HttpResponse(json, mimetype='application/json')  
     else:
         # Do something for anonymous users.
         return HttpResponse("You need to be logged in to like something")

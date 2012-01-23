@@ -6,12 +6,25 @@
 	Articles of {{year}}-{{month}}-{{day}}
 	<a href="/rate/{{tom_year}}/{{tom_month}}/{{tom_day}}">tomorrow</a></h1>
 
+<script>
+function vote(kind) {
+  $.getJSON("/rate/vote/", { identifier: {{ article.identifier }}, vote: kind }, function(json){
+    alert("Was successful?: " + json['success']);
+  });
+}
+function addClickHandlers() {
+  $("#like").click( function() { alert('test') });
+  $("#dislike").click( function() { vote("dislike") });
+}
+$(document).ready( addClickHandlers )
+</script>
+
 {% if article_list %}
     <dl>
     {% for article in article_list %}   	
         <dt><a href="/rate/detail/{{ article.identifier }}/">{{ article.identifier }}</a> 
-        	<a href="/rate/like/{{ article.identifier }}">like</a> 
-        	<a href="/rate/dislike/{{ article.identifier }}">dislike</a> 
+        	<span id="like">like</span> 
+        	<span id="dislike">dislike</span> 
         	<a href="http://arxiv.org/abs/{{ article.identifier }}">abs</a>    	
         	<a href="http://arxiv.org/pdf/{{ article.identifier }}">PDF</a><dt>
         <dd><div class="meta">
