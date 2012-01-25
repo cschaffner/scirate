@@ -1,0 +1,37 @@
+/****************************************
+
+* so far, just copy-pasted from arXiv.css
+
+ ****************************************/
+
+
+
+/****************************************
+ * General rules
+ ****************************************/
+
+body {
+	margin: 0;
+	padding: 0;
+	background-color: #fff;
+	color: #000;
+	font-family: 'Lucida Grande', helvetica, arial, verdana, sans-serif;
+	}
+
+a:link,
+a:visited,
+a:active {
+	text-decoration: none;
+	}
+
+a:hover {
+	text-decoration: underline;
+	}
+
+#content {
+	abstract {
+		p {
+			color: blue;
+			}
+		}
+	}

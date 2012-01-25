@@ -8,33 +8,46 @@
 
 <script>
 function vote(kind) {
-  $.getJSON("/rate/vote/", { identifier: {{ article.identifier }}, vote: kind }, function(json){
+  $.getJSON("/rate/vote/", { identifier: '1234.1234', vote: kind }, function(json){
     alert("Was successful?: " + json['success']);
   });
 }
 function addClickHandlers() {
-  $("#like").click( function() { alert('test') });
-  $("#dislike").click( function() { vote("dislike") });
+  $('.vote-up-off').click( function( event ) { 
+  	var $target = $(event.target);
+  	alert( $target.closest('td').attr('id') ) 
+  	});
+  $('.vote-down-off').click( function() { alert('dislike') });
 }
 $(document).ready( addClickHandlers )
 </script>
 
 {% if article_list %}
-    <dl>
-    {% for article in article_list %}   	
-        <dt><a href="/rate/detail/{{ article.identifier }}/">{{ article.identifier }}</a> 
-        	<span id="like">like</span> 
-        	<span id="dislike">dislike</span> 
-        	<a href="http://arxiv.org/abs/{{ article.identifier }}">abs</a>    	
-        	<a href="http://arxiv.org/pdf/{{ article.identifier }}">PDF</a><dt>
-        <dd><div class="meta">
-        	<div class="score">Score: {{ article.likes.count }} {{ article.dislikes.count }}</div>
-        	<div class="list-title">{{ article.title }}</div>
-        	<div class="list-authors">{{ article.authors }}</div>
-        	<p>{{ article.abstract }}</p>
-        </div></dd>	
+    <table>
+    {% for article in article_list %}  
+	    <tr>
+	    <td class="votecell" id="vote-{{ article.identifier }}">
+		    <a class="vote-up-off" title="like (click again to undo)">up vote</a>
+	    	<span class="vote-count-post">0</span>
+	    	<a class="vote-down-off" title="dislike (click again to undo)">down vote</a>
+		</td>
+		
+		<td class="articlecell">
+			<dl>
+	        <dt><a href="/rate/detail/{{ article.identifier }}/">{{ article.identifier }}</a> 
+	        	<a href="http://arxiv.org/abs/{{ article.identifier }}">abs</a>    	
+	        	<a href="http://arxiv.org/pdf/{{ article.identifier }}">PDF</a></dt>
+	        <dd>
+		       	<div class="score">Score: {{ article.likes.count }} {{ article.dislikes.count }}</div>
+	        	<div class="list-title">{{ article.title }}</div>
+	        	<div class="list-authors">{{ article.authors }}</div>
+	        	<div class="abstract"><p>{{ article.abstract }}</p></div>
+	        </dd>
+	        </dl>	
+	   	</td>
+	  	</tr>
     {% endfor %}
-    </dl>
+  	</table>
 {% else %}
     <p>No articles are available.</p>
 {% endif %}
