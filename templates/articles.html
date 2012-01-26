@@ -23,6 +23,7 @@ function addClickHandlers() {
   $('.abstract').click( function() { 
   	if ($( this ).css('font-size') == '4px') {
   		 $( this ).css('font-size', 'medium');
+  		 vote( 'abstract', $( this ).closest('td').attr('article-id') );
     } else {
     	 $( this ).css('font-size', '4px');
     }
@@ -38,9 +39,9 @@ $(document).ready( addClickHandlers )
     {% for article in article_list %}  
 	    <tr>
 	    <td class="votecell" article-id="{{ article.identifier }}">
-		    <a class="vote-up-off" title="like (click again to undo)">up vote</a>
-	    	<span class="vote-count">0</span>
-	    	<a class="vote-down-off" title="dislike (click again to undo)">down vote</a>
+		    <a class="vote-up-off" title="like (click again to undo)">up</a>
+	    	<span class="vote-count">{{ article.score }}</span>
+	    	<a class="vote-down-off" title="dislike (click again to undo)">down</a>
 		</td>
 		
 		<td class="articlecell">

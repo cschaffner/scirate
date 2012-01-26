@@ -11,7 +11,7 @@ import logging
 def articles(request,year=date.today().year,month='all',day='all'):
     # check for new articles on the arxiv
     Article.objects.update()
-    queryset=Article.objects.filter(date__year=year)
+    queryset=Article.objects.filter(date__year=year).order_by('-score')
     if month<>'all':
         queryset=queryset.filter(date__month=month)
     if day<>'all':
@@ -19,9 +19,8 @@ def articles(request,year=date.today().year,month='all',day='all'):
         tomorrow=date(int(year),int(month),int(day))+timedelta(days=1)
         yesterday=date(int(year),int(month),int(day))-timedelta(days=1)
     queryset = list(queryset)
-    queryset.sort(key = lambda x:-x.score())
-    
-    
+    queryset.sort(key = lambda x:(-x.score*1000 - x.abstract_expansions.count() - x.anonymous_abs_exp))
+       
     if request.user.is_authenticated():
         # Do something for authenticated users.
         return render_to_response('index_auth.html', {"article_list": queryset, 
@@ -39,8 +38,9 @@ def vote(request):
         # Get an instance of a logger
         logger = logging.getLogger('scirate.rate')
 
-        results = {'success':False}
-        if (request.method == u'GET' and request.is_ajax()):
+        result = {'success':False}
+#        if (request.method == u'GET' and request.is_ajax()):
+        if (request.method == u'GET'):
             GET = request.GET
             logger.info(GET)
             if GET.has_key(u'identifier') and GET.has_key(u'vote'):
@@ -52,8 +52,12 @@ def vote(request):
                     art.likes.add(request.user)
                 elif vote == u"dislike":
                     art.likes.remove(request.user)          
-                    art.dislikes.add(request.user)                
-                result={'success':True, 'score':art.likes.count() - art.dislikes.count()}
+                    art.dislikes.add(request.user) 
+                elif vote == u"abstract":
+                    art.abstract_expansions.add(request.user)                 
+                art.updatescore()
+                result={'success':True, 'score':art.score}
+                logger.info(result)
         json = simplejson.dumps(result)
         return HttpResponse(json, mimetype='application/json')  
     else:

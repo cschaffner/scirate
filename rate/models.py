@@ -131,14 +131,26 @@ class Article(models.Model):
     dislikes = models.ManyToManyField(User, related_name='disliked', blank=True)
     abstract_expansions = models.ManyToManyField(User, related_name='abs_expanded', blank=True)
     anonymous_abs_exp = models.IntegerField()
+    score = models.IntegerField()
     comments = models.ManyToManyField(User, through='Comment', blank=True)
     objects = ArticleManager()
 
     def __unicode__(self):
         return self.identifier
     
-    def score(self):
-        return self.likes.count() - self.dislikes.count()
+    def updatescore(self):
+        # Get an instance of a logger
+        logger = logging.getLogger('scirate.rate')
+        self.score = self.likes.count() - self.dislikes.count()
+        self.save()
+        logger.info('updated score of '+self.identifier+' to '+str(self.score))
+        return self.score
+        
+#    def save(self, *args, **kwargs):
+#        self.updatescore()
+#        super(Article, self).save(*args, **kwargs) # Call the "real" save() method.
+        
+        
 
 class Comment(models.Model):
     user = models.ForeignKey(User)
