@@ -7,28 +7,39 @@
 	<a href="/rate/{{tom_year}}/{{tom_month}}/{{tom_day}}">tomorrow</a></h1>
 
 <script>
-function vote(kind) {
-  $.getJSON("/rate/vote/", { identifier: '1234.1234', vote: kind }, function(json){
-    alert("Was successful?: " + json['success']);
+function vote(kind, id) {
+  $.getJSON("/rate/vote/", { identifier: id, vote: kind }, function(json){
+  	$('#test').text(json['score']);
+  	$('td[article-id="'+id+'"] span').text(json['score']);
+    //  alert("Was successful?: " + json['score']);
   });
 }
 function addClickHandlers() {
   $('.vote-up-off').click( function( event ) { 
-  	var $target = $(event.target);
-  	alert( $target.closest('td').attr('id') ) 
+	  	vote( 'like', $(event.target).closest('td').attr('article-id') ) 
   	});
-  $('.vote-down-off').click( function() { alert('dislike') });
+  $('.vote-down-off').click( function( event ) { 
+  	  	vote( 'dislike', $(event.target).closest('td').attr('article-id') ) });
+  $('.abstract').click( function() { 
+  	if ($( this ).css('font-size') == '4px') {
+  		 $( this ).css('font-size', 'medium');
+    } else {
+    	 $( this ).css('font-size', '4px');
+    }
+  	})
 }
 $(document).ready( addClickHandlers )
 </script>
+
+<span id="test">100</span>
 
 {% if article_list %}
     <table>
     {% for article in article_list %}  
 	    <tr>
-	    <td class="votecell" id="vote-{{ article.identifier }}">
+	    <td class="votecell" article-id="{{ article.identifier }}">
 		    <a class="vote-up-off" title="like (click again to undo)">up vote</a>
-	    	<span class="vote-count-post">0</span>
+	    	<span class="vote-count">0</span>
 	    	<a class="vote-down-off" title="dislike (click again to undo)">down vote</a>
 		</td>
 		

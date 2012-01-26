@@ -4,10 +4,12 @@ from rate.models import Article, DownloadAction
 from datetime import date, datetime, timedelta
 from django.views.generic import DetailView, ListView
 from django.contrib.auth import logout
+from django.utils import simplejson
 
+import logging
 
 def articles(request,year=date.today().year,month='all',day='all'):
-    # check for updates
+    # check for new articles on the arxiv
     Article.objects.update()
     queryset=Article.objects.filter(date__year=year)
     if month<>'all':
@@ -34,9 +36,13 @@ def articles(request,year=date.today().year,month='all',day='all'):
 
 def vote(request):
     if request.user.is_authenticated():
+        # Get an instance of a logger
+        logger = logging.getLogger('scirate.rate')
+
         results = {'success':False}
-        if request.method == u'GET':
+        if (request.method == u'GET' and request.is_ajax()):
             GET = request.GET
+            logger.info(GET)
             if GET.has_key(u'identifier') and GET.has_key(u'vote'):
                 ident = GET[u'identifier']
                 vote = GET[u'vote']
@@ -47,10 +53,8 @@ def vote(request):
                 elif vote == u"dislike":
                     art.likes.remove(request.user)          
                     art.dislikes.add(request.user)                
-                results = {'success':True}
-            if request.is_ajax():  
-                results = {'success':True}
-        json = simplejson.dumps(results)
+                result={'success':True, 'score':art.likes.count() - art.dislikes.count()}
+        json = simplejson.dumps(result)
         return HttpResponse(json, mimetype='application/json')  
     else:
         # Do something for anonymous users.
