@@ -1,29 +1,49 @@
 {% extends "base.html" %}
 
 {% block content %}
+<link type="text/css" href="/media/ui-lightness/jquery-ui-1.8.17.custom.css" rel="stylesheet" />	
+<script type="text/javascript" src="/media/jquery-ui-1.8.17.custom.min.js"></script>
+
 <h1>
 	<a href="/rate/{{yes_year}}/{{yes_month}}/{{yes_day}}">yesterday</a>
 	Articles of {{year}}-{{month}}-{{day}}
 	<a href="/rate/{{tom_year}}/{{tom_month}}/{{tom_day}}">tomorrow</a></h1>
 
 <script>
+	$(function() {
+		$( "#datepicker" ).datepicker( {
+			minDate: (new Date(2012, 1-1, 1)), 
+			maxDate: "+1D", 
+			dateFormat: 'yy/mm/dd',
+			gotoCurrent: true,
+			setDate: "{{year}}/{{month}}/{{day}}",
+			beforeShowDay: $.datepicker.noWeekends,
+			onSelect: function(dateText, inst) { 
+				window.location.href='/rate/'+dateText;
+				}
+		});
+	});
+</script>
+
+<div class="date" id="datepicker"></div>
+
+<script>
 function vote(kind, id) {
   $.getJSON("/rate/vote/", { identifier: id, vote: kind }, function(json){
-  	$('#test').text(json['score']);
-  	$('td[article-id="'+id+'"] span').text(json['score']);
+  	$('tr[article-id="'+id+'"][.votecell] span').text(json['score']);
     //  alert("Was successful?: " + json['score']);
   });
 }
 function addClickHandlers() {
   $('.vote-up-off').click( function( event ) { 
-	  	vote( 'like', $(event.target).closest('td').attr('article-id') ) 
+	  	vote( 'like', $(event.target).closest('tr').attr('article-id') ) 
   	});
   $('.vote-down-off').click( function( event ) { 
-  	  	vote( 'dislike', $(event.target).closest('td').attr('article-id') ) });
+  	  	vote( 'dislike', $(event.target).closest('tr').attr('article-id') ) });
   $('.abstract').click( function() { 
   	if ($( this ).css('font-size') == '4px') {
   		 $( this ).css('font-size', 'medium');
-  		 vote( 'abstract', $( this ).closest('td').attr('article-id') );
+  		 vote( 'abstract', $( this ).closest('tr').attr('article-id') );
     } else {
     	 $( this ).css('font-size', '4px');
     }
@@ -32,13 +52,13 @@ function addClickHandlers() {
 $(document).ready( addClickHandlers )
 </script>
 
-<span id="test">100</span>
+<small>total of {{article_list|length}} entries</small>
 
 {% if article_list %}
     <table>
     {% for article in article_list %}  
-	    <tr>
-	    <td class="votecell" article-id="{{ article.identifier }}">
+	    <tr article-id="{{ article.identifier }}">
+	    <td class="votecell">
 		    <a class="vote-up-off" title="like (click again to undo)">up</a>
 	    	<span class="vote-count">{{ article.score }}</span>
 	    	<a class="vote-down-off" title="dislike (click again to undo)">down</a>
