@@ -1,4 +1,16 @@
 {% extends "base.html" %}
+{% load url from future %}
+
+
+{% block sidebar %}
+{% if user.is_authenticated %}
+	<div class="status">Welcome, {{user.username}}. 
+	<a href="/rate/logout">Logout</a></div>
+{% else %}
+	<div class="status">Please <a href="/rate/login">log in</a>.</div>
+{% endif %}
+{% endblock sidebar %}
+
 
 {% block content %}
 <link type="text/css" href="/media/ui-lightness/jquery-ui-1.8.17.custom.css" rel="stylesheet" />	

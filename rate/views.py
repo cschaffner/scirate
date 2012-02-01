@@ -21,17 +21,11 @@ def articles(request,year=date.today().year,month='all',day='all'):
     queryset = list(queryset)
     queryset.sort(key = lambda x:(-x.score*1000 - x.abstract_expansions.count() - x.anonymous_abs_exp))
        
-    if request.user.is_authenticated():
-        # Do something for authenticated users.
-        return render_to_response('index_auth.html', {"article_list": queryset, 
-            "year": year, "month": month, "day": day,
-            "tom_year": tomorrow.year, "tom_month": '%02d' % tomorrow.month, "tom_day": '%02d' % tomorrow.day,
-            "yes_year": yesterday.year, "yes_month": '%02d' % yesterday.month, "yes_day": '%02d' % yesterday.day,            
-            "user": request.user})
-    else:
-        # Do something for anonymous users.
-        return render_to_response('index.html', {"article_list": queryset, 
-                                                 "year": year, "month": month, "day": day})
+    return render_to_response('articles.html', {"article_list": queryset, 
+        "year": year, "month": month, "day": day,
+        "tom_year": tomorrow.year, "tom_month": '%02d' % tomorrow.month, "tom_day": '%02d' % tomorrow.day,
+        "yes_year": yesterday.year, "yes_month": '%02d' % yesterday.month, "yes_day": '%02d' % yesterday.day,            
+        "user": request.user})
 
 def vote(request):
     if request.user.is_authenticated():

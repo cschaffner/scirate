@@ -77,7 +77,7 @@ class ArticleManager(models.Manager):
                     datestring = nodedata.getElementsByTagName('version').item(0).childNodes.item(0).childNodes.item(0).nodeValue
                     date = datetime.strptime(datestring,'%a, %d %b %Y %H:%M:%S GMT')
                     
-                    art.date = date.date()
+                    art.date = self.mailingdata(date.date())
                     art.anonymous_abs_exp = 0
                     art.score = 0
                     art.save()
