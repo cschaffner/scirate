@@ -47,7 +47,7 @@ class ArticleManager(models.Manager):
         lastdown=DownloadAction.objects.order_by('download_time').reverse()[:1][0]
         now=datetime.utcnow()
         added=0
-        skipped=0
+        updated=0
         if lastdown.nextdata < now:
             # download required
     
@@ -76,26 +76,64 @@ class ArticleManager(models.Manager):
                     # determine date from first available version
                     datestring = nodedata.getElementsByTagName('version').item(0).childNodes.item(0).childNodes.item(0).nodeValue
                     date = datetime.strptime(datestring,'%a, %d %b %Y %H:%M:%S GMT')
+                    
                     art.date = date.date()
                     art.anonymous_abs_exp = 0
+                    art.score = 0
                     art.save()
                     added += 1
                 else:
-                    skipped += 1  
+                    # TODO: think about whether article info should be updated or not
+                    # or maybe just journal_ref ??
+                    updated += 1  
             
             # register download-action
             down=DownloadAction()
             down.download_time=now
             down.nextdata=self.nextdata(now)
             down.num_new_articles = added
-            down.num_skipped_articles = skipped
+            down.num_skipped_articles = updated
             down.save()
             
-            logger.info("Added %d articles, and skipped %d" % (added,skipped))
+            logger.info("Added %d articles, and skipped %d" % (added,updated))
                         
             return added
         else:
             return 0
+    
+    def mailingdata(self,upload):
+        # returns the date of the mailing in which an article will be announced  which is uploaded at "upload" 
+        
+        # Get an instance of a logger
+        logger = logging.getLogger('scirate.rate')
+
+        # first move to the next 21:00 GMT
+        mailing = datetime(upload.year,upload.month,upload.day,21,0)
+        diff = mailing - upload
+        logger.info(diff)
+        if diff.total_seconds() < 0:
+            tom = mailing + timedelta(days=1)
+            mailing=datetime(tom.year,tom.month,tom.day,21,0)
+        logger.info('after corr:')
+        logger.info(mailing)
+        
+        if mailing.weekday()>4: # larger than Friday
+            # then move to Monday
+            mailing=mailing+timedelta(days=7-mailing.weekday())
+            logger.info('moved to monday: ')
+            logger.info(mailing)      
+            
+        # now we still have to add a day
+        if mailing.weekday() <4: # if it's Monday to Thursday
+            # we can simply add a day
+            mailing=mailing+timedelta(days=1)
+            logger.info('simply add one day')
+        elif mailing.weekday() == 4: # it it's Friday
+            # we need to move it to Monday
+            mailing=mailing+timedelta(days=3)
+            logger.info('move to monday, add 3 days')
+
+        return mailing
     
     def nextdata(self,now):
         # returns the next datetime after now (given in UTC) when new data will be available to harvest on the arxiv
@@ -111,7 +149,8 @@ class ArticleManager(models.Manager):
         nextdata=datetime(now.year,now.month,now.day,4,0)
         diff=nextdata-now
         if diff.total_seconds() < 0:
-            nextdata=datetime(now.year,now.month,now.day+1,4,0)
+            tom = now + timedelta(days=1)
+            nextdata=datetime(tom.year,tom.month,tom.day,4,0)
         
         if nextdata.weekday()>4: # larger than Friday
             # then move to Monday

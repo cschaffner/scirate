@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Statistics of arXiv:{{ article.identifier }}</h1>
+
+{% if article.likes %}
+    <table>
+    <tr><td>user liking it:</td></tr>
+    {% for user in article.likes.all %}  
+		<tr><td>{{user.username}}</tr></td>
+    {% endfor %}
+	</table>
+{% endif %}
+
+<p>
+<div id="dislikes">number of dislikes: {{article.dislikes.count}}</div>
+
+<div id="abstract_exp">number of abstract expansions by registered users: {{article.abstract_expansions.count}}</div>
+<div id="abstract_exp">number of anonymous abstract expansions: {{article.anonymous_abs_exp}}</div>
+
+
+{% endblock content %}

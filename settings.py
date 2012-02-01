@@ -106,7 +106,7 @@ ROOT_URLCONF = 'scirate.urls'
 
 TEMPLATE_DIRS = (
     os.path.join(ROOT_PATH, 'templates'),
-    '/Users/chris/Sites/scirate/templates'
+    '/Users/chris/Sites/scirate/rate/templates'
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
