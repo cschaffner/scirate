@@ -31,4 +31,5 @@ urlpatterns = patterns('rate.views',
 )
 urlpatterns += patterns('',
     url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
+    url(r'^accounts/',  include('registration.backends.default.urls')),
 )

@@ -1,0 +1,13 @@
+{% autoescape off %}
+
+You have received this email because you have requested an account creation.
+You have {{ expiration_days }} days left to activate your user account.
+Your activation key is: {{ activation_key }}
+
+
+Please go to the following page to confirm your signing up : 
+{{ protocol }}://{{ domain }}
+
+Thanks.
+
+{% endautoescape %}
