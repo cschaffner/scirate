@@ -1,13 +1,12 @@
 {% extends "base.html" %}
-{% load url from future %}
-
 
 {% block sidebar %}
 {% if user.is_authenticated %}
 	<div class="status">Welcome, {{user.username}}. 
-	<a href="/rate/logout">Logout</a></div>
+	<a href="/rate/accounts/logout">Logout</a></div>
 {% else %}
-	<div class="status">Please <a href="/rate/login">log in</a>.</div>
+	<div class="status">Please <a href="/rate/accounts/login?next={{ request.get_full_path }}">log in</a> 
+		 	or <a href="/rate/accounts/register">sign up</a>.</div>
 {% endif %}
 {% endblock sidebar %}
 
@@ -16,10 +15,7 @@
 <link type="text/css" href="/media/ui-lightness/jquery-ui-1.8.17.custom.css" rel="stylesheet" />	
 <script type="text/javascript" src="/media/jquery-ui-1.8.17.custom.min.js"></script>
 
-<h1>
-	<a href="/rate/{{yes_year}}/{{yes_month}}/{{yes_day}}">yesterday</a>
-	Articles of {{year}}-{{month}}-{{day}}
-	<a href="/rate/{{tom_year}}/{{tom_month}}/{{tom_day}}">tomorrow</a></h1>
+<h1>Articles of {{year}}-{{month}}-{{day}}</h1>
 
 <script>
 	$(function() {
@@ -28,11 +24,11 @@
 			maxDate: "+1D", 
 			dateFormat: 'yy/mm/dd',
 			gotoCurrent: true,
-			setDate: "{{year}}/{{month}}/{{day}}",
 			beforeShowDay: $.datepicker.noWeekends,
+			setDate: new Date({{year}},{{month}},{{day}}),
 			onSelect: function(dateText, inst) { 
 				window.location.href='/rate/'+dateText;
-				}
+			},
 		});
 	});
 </script>
@@ -60,6 +56,10 @@ function addClickHandlers() {
     	 $( this ).css('font-size', '4px');
     }
   	})
+  	
+  // I dont't get it, setting the date does not work...
+  var queryDate = new Date('{{year}}/{{month}}/{{day}}');
+  $('#datePicker').datepicker('setDate', queryDate );
 }
 $(document).ready( addClickHandlers )
 </script>

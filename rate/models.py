@@ -95,7 +95,7 @@ class ArticleManager(models.Manager):
             down.num_skipped_articles = updated
             down.save()
             
-            logger.info("Added %d articles, and skipped %d" % (added,updated))
+            logger.info("Added %d articles, and updated %d" % (added,updated))
                         
             return added
         else:

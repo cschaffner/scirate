@@ -27,9 +27,9 @@ urlpatterns = patterns('rate.views',
     url(r'^like/(?P<id>\d{4}\.\d{4})/$', 'like'),
     url(r'^dislike/(?P<id>\d{4}\.\d{4})/$', 'dislike'),
     url(r'^vote/', 'vote'),
-    url(r'^logout$', 'logout_view'),            
+    url(r'^accounts/logout/$', 'logout_view'),            
 )
 urlpatterns += patterns('',
-    url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
+#    url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
     url(r'^accounts/',  include('registration.backends.default.urls')),
 )
