@@ -1,6 +1,8 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.views.generic import DetailView, ListView
 from rate.models import Article
+from django.contrib.auth.models import User
+
 from datetime import date
 from django.contrib.auth import views
 
@@ -27,6 +29,10 @@ urlpatterns = patterns('rate.views',
     url(r'^like/(?P<id>\d{4}\.\d{4})/$', 'like'),
     url(r'^dislike/(?P<id>\d{4}\.\d{4})/$', 'dislike'),
     url(r'^vote/', 'vote'),
+    url(r'^user/(?P<pk>\D+)', 
+        DetailView.as_view(
+                    model=User,
+                    template_name='user.html')),
     url(r'^accounts/logout/$', 'logout_view'),            
 )
 urlpatterns += patterns('',

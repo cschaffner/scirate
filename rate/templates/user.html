@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Statistics of user:{{ user.username }}</h1>
+
+{% if user.liked %}
+    <table>
+    <tr><td>likes:</td></tr>
+    {% for art in user.liked.all %}  
+		<tr><td>{{art.identifier}}</tr></td>
+    {% endfor %}
+	</table>
+{% endif %}
+
+{% if user.disliked %}
+    <table>
+    <tr><td>dislikes:</td></tr>
+    {% for art in user.disliked.all %}  
+		<tr><td>{{art.identifier}}</tr></td>
+    {% endfor %}
+	</table>
+{% endif %}
+
+{% if user.abs_expanded %}
+    <table>
+    <tr><td>looked at abstracts of:</td></tr>
+    {% for art in user.abs_expanded.all %}  
+		<tr><td>{{art.identifier}}</tr></td>
+    {% endfor %}
+	</table>
+{% endif %}
+
+
+{% endblock content %}

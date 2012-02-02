@@ -8,6 +8,10 @@ Your activation key is: {{ activation_key }}
 Please go to the following page to confirm your signing up : 
 http://{{site.domain}}/rate/accounts/activate/{{activation_key}}
 
+for testing:
+http://http://127.0.0.1:8000/rate/accounts/activate/{{activation_key}}
+
+
 Thanks.
 
 {% endautoescape %}

@@ -87,7 +87,6 @@ def logout_view(request):
     return redirect('/rate')
 
     
-    
 #ListView.as_view(
 #        queryset=Article.objects.order_by('-date')[:50],
 #        context_object_name='latest_article_list',
