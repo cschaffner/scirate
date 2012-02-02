@@ -3,8 +3,15 @@ crowd-sourcing the daily routine of selecting the interesting arXiv-papers
 
 using the Django/Python web-framework
 started in January 2012 by Christian Schaffner (huebli@gmail.com)
+(let me know if you wanna help!)
 
-Install:
-1. adjust database and template paths in settings.py
-2. run "python manage.py syncdb" to create the database
+
+Install instructions:
+* install https://bitbucket.org/ubernostrum/django-registration/
+
+* rename settings.py.template to settings.py
+* adjust database and template paths in settings.py
+* adjust mail settings in settings.py
+
+* run "python manage.py syncdb" to create the database
 
