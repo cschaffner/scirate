@@ -29,10 +29,7 @@ urlpatterns = patterns('rate.views',
     url(r'^like/(?P<id>\d{4}\.\d{4})/$', 'like'),
     url(r'^dislike/(?P<id>\d{4}\.\d{4})/$', 'dislike'),
     url(r'^vote/', 'vote'),
-    url(r'^user/(?P<pk>\D+)', 
-        DetailView.as_view(
-                    model=User,
-                    template_name='user.html')),
+    url(r'^user/', 'user'), 
     url(r'^accounts/logout/$', 'logout_view'),            
 )
 urlpatterns += patterns('',

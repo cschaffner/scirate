@@ -2,7 +2,7 @@
 
 {% block sidebar %}
 {% if user.is_authenticated %}
-	<div class="status">Welcome, {{user.username}}. 
+	<div class="status">Welcome, <a href="/rate/user">{{user.username}}</a>. 
 	<a href="/rate/accounts/logout">Logout</a></div>
 {% else %}
 	<div class="status">Please <a href="/rate/accounts/login?next={{ request.get_full_path }}">log in</a> 

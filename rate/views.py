@@ -5,9 +5,19 @@ from datetime import date, datetime, timedelta
 from django.views.generic import DetailView, ListView
 from django.contrib.auth import logout
 from django.utils import simplejson
+from django.contrib.auth.decorators import login_required
 
 import logging
 
+@login_required
+def user(request):
+    # Get an instance of a logger
+    logger = logging.getLogger('scirate.rate')
+
+    logger.info(request.user.username)    
+    return render_to_response('user.html', {'user': request.user})
+
+    
 def articles(request,year=date.today().year,month='all',day='all'):
     # check for new articles on the arxiv
     Article.objects.update()

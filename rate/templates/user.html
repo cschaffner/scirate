@@ -2,7 +2,14 @@
 
 {% block content %}
 
-<h1>Statistics of user:{{ user.username }}</h1>
+<h1>Statistics of user: {{user.username}}</h1>
+
+<div id="joined">joined: {{user.date_joined|date:'r'}}</div>
+<div id="last_login">last login: {{user.last_login|date:'r'}}</div>
+
+<a id="pwd_reset" href="/rate/accounts/password/change">change password</a>
+
+<p></p>
 
 {% if user.liked %}
     <table>
@@ -13,6 +20,7 @@
 	</table>
 {% endif %}
 
+<p></p>
 {% if user.disliked %}
     <table>
     <tr><td>dislikes:</td></tr>
@@ -22,6 +30,7 @@
 	</table>
 {% endif %}
 
+<p></p>
 {% if user.abs_expanded %}
     <table>
     <tr><td>looked at abstracts of:</td></tr>

@@ -138,6 +138,9 @@ EMAIL_USE_TLS = True
 # for now, the mails are just output to the console
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+# that's where @login_required refers to 
+LOGIN_URL = '/rate/accounts/login'
+
 
 # logging configuration from the Django doc
 LOGGING = {
