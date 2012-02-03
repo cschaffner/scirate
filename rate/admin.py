@@ -6,7 +6,7 @@ admin.site.register(UserProfile)
 admin.site.register(Comment)
 
 class DownloadActionAdmin(admin.ModelAdmin):
-    list_display = ('download_time', 'num_new_articles', 'num_skipped_articles')
+    list_display = ('download_time', 'num_new_articles', 'num_updated_articles')
 
 admin.site.register(DownloadAction, DownloadActionAdmin)
 

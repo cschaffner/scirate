@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import *
 from xml.dom.minidom import parse
-import urllib
+import urllib2
 
 # import the logging library
 import logging
@@ -12,7 +12,7 @@ class DownloadAction(models.Model):
     download_time = models.DateTimeField()
     nextdata = models.DateTimeField()
     num_new_articles = models.IntegerField()
-    num_skipped_articles = models.IntegerField()
+    num_updated_articles = models.IntegerField()
 
 class UserProfile(models.Model):
     ARXIV_MIRRORS = (
@@ -55,7 +55,18 @@ class ArticleManager(models.Manager):
             (lastdown.download_time.year, lastdown.download_time.month, lastdown.download_time.day, now.year, now.month, now.day)
             logger.info(URL)
             
-            dom = parse(urllib.urlopen(URL))
+            try:
+                xmlfile=urllib2.urlopen(URL)
+            except urllib2.HTTPError, e:
+                if e.code == 503:
+                    # don't do anything at the moment, but wait until articles are loaded again
+                    # in particular, do not add a DownloadAction event 
+                    return
+                else:
+                    # raise the error
+                    raise
+            
+            dom = parse(xmlfile)
 #            dom = parse('biglist.xml')
     
             articles = dom.getElementsByTagName('record')
@@ -92,7 +103,7 @@ class ArticleManager(models.Manager):
             down.download_time=now
             down.nextdata=self.nextdata(now)
             down.num_new_articles = added
-            down.num_skipped_articles = updated
+            down.num_updated_articles = updated
             down.save()
             
             logger.info("Added %d articles, and updated %d" % (added,updated))
@@ -114,24 +125,24 @@ class ArticleManager(models.Manager):
         if diff.total_seconds() < 0:
             tom = mailing + timedelta(days=1)
             mailing=datetime(tom.year,tom.month,tom.day,21,0)
-        logger.info('after corr:')
-        logger.info(mailing)
+        logger.debug('after corr:')
+        logger.debug(mailing)
         
         if mailing.weekday()>4: # larger than Friday
             # then move to Monday
             mailing=mailing+timedelta(days=7-mailing.weekday())
-            logger.info('moved to monday: ')
-            logger.info(mailing)      
+            logger.debug('moved to monday: ')
+            logger.debug(mailing)      
             
         # now we still have to add a day
         if mailing.weekday() <4: # if it's Monday to Thursday
             # we can simply add a day
             mailing=mailing+timedelta(days=1)
-            logger.info('simply add one day')
+            logger.debug('simply add one day')
         elif mailing.weekday() == 4: # it it's Friday
             # we need to move it to Monday
             mailing=mailing+timedelta(days=3)
-            logger.info('move to monday, add 3 days')
+            logger.debug('move to monday, add 3 days')
 
         return mailing
     
