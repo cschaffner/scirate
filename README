@@ -13,5 +13,5 @@ Install instructions:
 * adjust database and template paths in settings.py
 * adjust mail settings in settings.py
 
-* run "python manage.py syncdb" to create the database
+* run "python manage.py syncdb" to create the database and load the fixtures
 

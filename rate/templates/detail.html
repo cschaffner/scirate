@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block title %}
+- {{ article.identifier }}
+{% endblock title %}
+
 {% block content %}
 
 <h1>Statistics of arXiv:{{ article.identifier }}</h1>

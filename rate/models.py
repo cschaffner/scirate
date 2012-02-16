@@ -9,9 +9,21 @@ import logging
 
 class DownloadAction(models.Model):
     # all times in this project are UTC
+    
+    # when has data been downloaded from arxiv
     download_time = models.DateTimeField()
+    # when will be new data available from the arxiv
     nextdata = models.DateTimeField()
+    # how many articles have been downloaded
     num_new_articles = models.IntegerField()
+    # how many articles have been updated (i.e. were already in the database)
+    # these articles are included in the arxiv-update, as every change, also in the
+    # metadata, shows up in the arxiv-listing.
+    # One could silently update the article in the database with this latest data
+    # (which actually means that the original "voting" 
+    #  might have been for a previous version of the article, 
+    # TODO: maybe the voting should be for a particular version instead?)
+    # So far, nothing is done with articles that already exist in the database
     num_updated_articles = models.IntegerField()
 
 class UserProfile(models.Model):
@@ -31,9 +43,14 @@ class UserProfile(models.Model):
         ('aps', 'U.S. mirror'),
         ('lanl', 'U.S. mirror'),
     )
+    # UserProfile has a 1-to-1 relation with django's built-in User-class which is used for authentication
+    # i.e. it just extends that class
     user = models.ForeignKey(User, unique=True)
+    # users can have a preference for a particular arxiv-mirror
     mirror_pref = models.CharField(max_length=4, choices=ARXIV_MIRRORS, blank=True, null=True)
-    #  arxiv_category_pref
+    # TODO: have a preference for a particular arxiv-category
+    # so far, the whole project is only for quant-ph.
+    # arxiv_category_pref
 
     def __unicode__(self):
         return self.user
@@ -65,16 +82,27 @@ class ArticleManager(models.Manager):
                 else:
                     # raise the error
                     raise
+            except urllib2.URLError, e:
+                logger.error('we are probably offline. Do not do anything for now.')
+                return
+                    
             
+            # parse xmlfile into a DOM-object
             dom = parse(xmlfile)
 #            dom = parse('biglist.xml')
     
+            # now we can maneuver around in the DOM-object to harvest the needed data
+            
+            # get the a list of all "articles"
             articles = dom.getElementsByTagName('record')
         
             for node in articles:
+                # get the metadata
                 nodedata = node.childNodes.item(3).childNodes.item(1)
+                # get the identifier
                 ident = nodedata.getElementsByTagName('id').item(0).childNodes.item(0).nodeValue
                 if Article.objects.filter(identifier=ident).count()==0:
+                    # article with this identifier does not exist yet, create a new one
                     art = Article()
                     art.identifier = nodedata.getElementsByTagName('id').item(0).childNodes.item(0).nodeValue
                     art.title = nodedata.getElementsByTagName('title').item(0).childNodes.item(0).nodeValue
@@ -84,11 +112,12 @@ class ArticleManager(models.Manager):
                         art.journal_ref = nodedata.getElementsByTagName('journal-ref').item(0).childNodes.item(0).nodeValue
                     if nodedata.getElementsByTagName('comments').length==1:
                         art.arxiv_comments = nodedata.getElementsByTagName('comments').item(0).childNodes.item(0).nodeValue
-                    # determine date from first available version
+                    # determine mailing date from first available version
                     datestring = nodedata.getElementsByTagName('version').item(0).childNodes.item(0).childNodes.item(0).nodeValue
                     date = datetime.strptime(datestring,'%a, %d %b %Y %H:%M:%S GMT')
-                    
                     art.date = self.mailingdata(date).date()
+                    
+                    # initialize scores:
                     art.anonymous_abs_exp = 0
                     art.score = 0
                     art.save()
@@ -121,7 +150,7 @@ class ArticleManager(models.Manager):
         # first move to the next 21:00 GMT
         mailing = datetime(upload.year,upload.month,upload.day,21,0)
         diff = mailing - upload
-        logger.info(diff)
+        logger.debug(diff)
         if diff.total_seconds() < 0:
             tom = mailing + timedelta(days=1)
             mailing=datetime(tom.year,tom.month,tom.day,21,0)
@@ -170,32 +199,51 @@ class ArticleManager(models.Manager):
         
 
 class Article(models.Model):
+    # model of an article
+    # identifier as primary index, has to be unique
     identifier = models.CharField(max_length=20, primary_key=True)
     title = models.CharField(max_length=200)
+    # string of names
     authors = models.CharField(max_length=300)
     abstract = models.TextField()
+    # the date of the mailing the article appeared first
     date = models.DateField()
     journal_ref = models.CharField(max_length=300, blank=True)
     arxiv_comments = models.CharField(max_length=300, blank = True)
+
+    # many-to-many relation with Users to indicate a "like", "dislike" and "abstract_expansion" votes
     likes = models.ManyToManyField(User, related_name='liked', blank=True)
     dislikes = models.ManyToManyField(User, related_name='disliked', blank=True)
     abstract_expansions = models.ManyToManyField(User, related_name='abs_expanded', blank=True)
+
+    # number of anonymous abstract extensions
     anonymous_abs_exp = models.IntegerField()
+    # score calculated by self.updatescore, basically #likes - #dislikes
+    # [CS: it feels a big weird to have this number as property of the class, but it turns out to be 
+    #  simpler this way. Otherwise, retrieving articles sorted according to score=#likes-#dislikes
+    #  would require custom SQL-code, and I'm trying to avoid that in order to keep compatibility 
+    #  with arbitrary databases.]
     score = models.IntegerField()
+    # many-to-many relation with Users, the actual comment has its own class below
+    # maybe commenting should be rather done with the Django-internal commenting functions?
     comments = models.ManyToManyField(User, through='Comment', blank=True)
+    # the model-manager above contains the methods that can be called on Article (such as "update")
     objects = ArticleManager()
 
     def __unicode__(self):
         return self.identifier
     
     def updatescore(self):
+        # updates the score of a paper
+        
         # Get an instance of a logger
         logger = logging.getLogger('scirate.rate')
         self.score = self.likes.count() - self.dislikes.count()
         self.save()
-        logger.info('updated score of '+self.identifier+' to '+str(self.score))
+        logger.debug('updated score of '+self.identifier+' to '+str(self.score))
         return self.score
         
+# probably not necessary, as there are only a few (AJAX-)events when the score actually needs to be updated
 #    def save(self, *args, **kwargs):
 #        self.updatescore()
 #        super(Article, self).save(*args, **kwargs) # Call the "real" save() method.

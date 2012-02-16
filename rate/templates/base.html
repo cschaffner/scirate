@@ -6,11 +6,12 @@
 <head>
     <link rel="stylesheet" href="/media/scirate.css" >
 	<script src="/media/jquery.js"></script>	
-    <title>Scirate Reloaded</title>
+    <title>Scirate Reloaded {% block title %}{% endblock %}</title>
 </head>
 
 <body>
     <div id="sidebar">
+	<!-- This should be formatted by CSS, for now it's more of a header than a side bar-->
         {% block sidebar %}
         {% endblock %}
     </div>
